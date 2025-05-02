@@ -173,7 +173,7 @@ class SAMV2ImageEncoder(nn.Module):
             image_tensor = image_tensor.permute(0, 3, 1, 2)
         # Convert to RGB if needed
         if src_color_format == "bgr":
-            image_tensor = image_tensor.flip(-1)
+            image_tensor = image_tensor.flip(1)
 
         img_h, img_w = image_tensor.shape[2:]
         largest_side = max(img_h, img_w)
