@@ -28,7 +28,7 @@ from .state_dict_conversion.convert_original_state_dict_keys import convert_stat
 
 def make_samv2_from_original_state_dict(
     original_state_dict: dict | str, strict_load=True, weights_only=True
-) -> [dict, SAMV2Model]:
+) -> tuple[dict, SAMV2Model]:
     """
     Function used to initialize a SAMV2 model from a state dictionary (i.e. model weights) file.
     This function will automatically figure out the model sizing parameters from the state dict,
