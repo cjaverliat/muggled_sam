@@ -10,6 +10,7 @@ import numpy as np
 
 import torch
 import torch.nn as nn
+from typing import Literal
 
 from .components.hiera_model import HieraModel
 from .components.imgenc_components import HalfStepPatchEmbed, WindowTiledPositionEncoding, OutputProjection
@@ -19,6 +20,7 @@ from .components.shared import Conv1x1Layer
 from torch import Tensor
 from numpy import ndarray
 
+from math import ceil
 
 # ---------------------------------------------------------------------------------------------------------------------
 # %% Classes
@@ -138,48 +140,67 @@ class SAMV2ImageEncoder(nn.Module):
 
     # .................................................................................................................
 
-    def prepare_image(
+    def prepare_image_tensor(
         self,
-        image_bgr: ndarray,
-        max_side_length=1024,
-        use_square_sizing=True,
-        pad_to_square=False,
+        image_tensor: Tensor,
+        max_side_length: int = 1024,
+        use_square_sizing: bool = True,
+        pad_to_square: bool = False,
+        color_format: Literal["rgb", "bgr"] = "rgb",
+        channels_layout: Literal["chw", "hwc"] = "chw",
     ) -> Tensor:
         """
-        Helper used to convert opencv-formatted images (e.g. from loading: cv2.imread(path_to_image)
-        into the format needed by the image encoder model (includes scaling and RGB normalization steps)
+        Helper used to convert images tensor into the format needed by the image encoder model (includes scaling
+        and RGB normalization steps)
         Returns:
             image_as_tensor_bchw
         """
+        if image_tensor.ndim not in (3, 4):
+            raise ValueError(f"Expected image tensor to have 3 or 4 dimensions, got {image_tensor.ndim}")
+        if channels_layout == "chw" and image_tensor.shape[-3] != 3:
+            raise ValueError(f"Expected image tensor to have shape (B, 3, H, W) or (3, H, W), got {image_tensor.shape}")
+        if channels_layout == "hwc" and image_tensor.shape[-1] != 3:
+            raise ValueError(f"Expected image tensor to have shape (B, H, W, 3) or (H, W, 3), got {image_tensor.shape}")
 
-        # Figure out scaling factor to get target side length
-        img_h, img_w = image_bgr.shape[0:2]
+        device, dtype = self.mean_rgb.device, self.mean_rgb.dtype
+        image_tensor = image_tensor.to(device=device, dtype=dtype)
+
+        # Add batch dimension if not present
+        if image_tensor.ndim == 3:
+            image_tensor = image_tensor.unsqueeze(0)
+        # Re-order channels to BCHW format if needed
+        if channels_layout == "hwc":
+            image_tensor = image_tensor.permute(0, 3, 1, 2)
+        # Convert to RGB if needed
+        if color_format == "bgr":
+            image_tensor = image_tensor.flip(-1)
+
+        img_h, img_w = image_tensor.shape[2:]
         largest_side = max(img_h, img_w)
         scale_factor = max_side_length / largest_side
 
         # Force sizing to multiples of a specific tiling size
         tiling_size = self.get_image_tiling_size_constraint()
+
+        # Force sizing to multiples of a specific tiling size
+        tiling_size = self.get_image_tiling_size_constraint()
         if use_square_sizing:
-            scaled_side = int(np.ceil(largest_side * scale_factor / tiling_size)) * tiling_size
+            scaled_side = ceil(largest_side * scale_factor / tiling_size) * tiling_size
             scaled_h = scaled_w = scaled_side
         else:
-            scaled_h = int(np.ceil(img_h * scale_factor / tiling_size)) * tiling_size
-            scaled_w = int(np.ceil(img_w * scale_factor / tiling_size)) * tiling_size
+            scaled_h = ceil(img_h * scale_factor / tiling_size) * tiling_size
+            scaled_w = ceil(img_w * scale_factor / tiling_size) * tiling_size
 
-        # Scale RGB image to correct size and re-order from HWC to BCHW (with batch of 1)
-        device, dtype = self.mean_rgb.device, self.mean_rgb.dtype
-        image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
-        image_tensor_chw = torch.tensor(np.transpose(image_rgb, (2, 0, 1)), device=device, dtype=dtype)
-        image_tensor_bchw = torch.nn.functional.interpolate(
-            image_tensor_chw.unsqueeze(0),
+        # Scale RGB image to correct size
+        image_tensor = torch.nn.functional.interpolate(
+            image_tensor,
             size=(scaled_h, scaled_w),
             align_corners=False,
             antialias=True,
             mode="bilinear",
         )
 
-        # Perform mean/scale normalization
-        image_tensor_bchw = (image_tensor_bchw - self.mean_rgb) * self.stdev_scale_rgb
+        image_tensor = (image_tensor - self.mean_rgb) * self.stdev_scale_rgb
 
         # The original SAM implementation padded the short side of the image to form a square
         # -> This results in more processing and isn't required in this implementation!
@@ -187,10 +208,44 @@ class SAMV2ImageEncoder(nn.Module):
             pad_left, pad_top = 0, 0
             pad_bottom = max_side_length - scaled_h
             pad_right = max_side_length - scaled_w
-            image_tensor_bchw = nn.functional.pad(image_tensor_bchw, (pad_left, pad_right, pad_top, pad_bottom))
+            image_tensor = nn.functional.pad(image_tensor, (pad_left, pad_right, pad_top, pad_bottom))
 
-        return image_tensor_bchw
+        return image_tensor
 
+    def prepare_image(
+        self,
+        image: ndarray,
+        max_side_length=1024,
+        use_square_sizing=True,
+        pad_to_square=False,
+        src_color_format: Literal["rgb", "bgr"] = "bgr",
+        channels_layout: Literal["chw", "hwc"] = "hwc",
+    ) -> Tensor:
+        """
+        Helper used to convert opencv-formatted images (e.g. from loading: cv2.imread(path_to_image))
+        into the format needed by the image encoder model (includes scaling and RGB normalization steps)
+
+        Args:
+            image_bgr: numpy image (e.g. loaded from cv2.imread(path_to_image))
+            max_side_length: Maximum side length of the image after scaling
+            use_square_sizing: Whether to force the image to be square
+            pad_to_square: Whether to pad the image to a square
+            color_format: Whether the image is in RGB or BGR format. Default is BGR because that's what OpenCV uses.
+            channels_layout: Whether the image is in CHW or HWC format. Default is HWC because that's what OpenCV uses.
+
+        Returns:
+            image_as_tensor_bchw
+        """
+        image_tensor = torch.tensor(image, device=self.mean_rgb.device, dtype=self.mean_rgb.dtype)
+
+        return self.prepare_image_tensor(
+            image_tensor,
+            max_side_length=max_side_length,
+            use_square_sizing=use_square_sizing,
+            pad_to_square=pad_to_square,
+            color_format=src_color_format,
+            channels_layout=channels_layout,
+        )
     # .................................................................................................................
 
     def get_image_tiling_size_constraint(self) -> int:
