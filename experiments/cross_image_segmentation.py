@@ -26,17 +26,17 @@ from collections import deque
 import torch
 import cv2
 
-from lib.make_sam import make_sam_from_state_dict
-from lib.v2_sam.sam_v2_model import SAMV2Model
+from muggled_sam.make_sam import make_sam_from_state_dict
+from muggled_sam.v2_sam.sam_v2_model import SAMV2Model
 
-from lib.demo_helpers.ui.video import ValueChangeTracker
-from lib.demo_helpers.ui.window import DisplayWindow, KEY
-from lib.demo_helpers.ui.layout import HStack, VStack, OverlayStack
-from lib.demo_helpers.ui.images import ExpandingImage
-from lib.demo_helpers.ui.text import ValueBlock
-from lib.demo_helpers.ui.static import StaticMessageBar, HSeparator, VSeparator
-from lib.demo_helpers.ui.sliders import HSlider
-from lib.demo_helpers.shared_ui_layout import (
+from muggled_sam.demo_helpers.ui.video import ValueChangeTracker
+from muggled_sam.demo_helpers.ui.window import DisplayWindow, KEY
+from muggled_sam.demo_helpers.ui.layout import HStack, VStack, OverlayStack
+from muggled_sam.demo_helpers.ui.images import ExpandingImage
+from muggled_sam.demo_helpers.ui.text import ValueBlock
+from muggled_sam.demo_helpers.ui.static import StaticMessageBar, HSeparator, VSeparator
+from muggled_sam.demo_helpers.ui.sliders import HSlider
+from muggled_sam.demo_helpers.shared_ui_layout import (
     build_mask_preview_buttons,
     build_tool_buttons,
     build_tool_overlays,
@@ -45,12 +45,12 @@ from lib.demo_helpers.shared_ui_layout import (
     update_mask_preview_buttons,
 )
 
-from lib.demo_helpers.video_frame_select_ui import run_video_frame_select_ui
-from lib.demo_helpers.contours import get_contours_from_mask
-from lib.demo_helpers.mask_postprocessing import calculate_mask_stability_score
-from lib.demo_helpers.history_keeper import HistoryKeeper
-from lib.demo_helpers.loading import ask_for_path_if_missing, ask_for_model_path_if_missing, load_init_prompts
-from lib.demo_helpers.misc import get_default_device_string, make_device_config, get_total_cuda_vram_usage_mb
+from muggled_sam.demo_helpers.video_frame_select_ui import run_video_frame_select_ui
+from muggled_sam.demo_helpers.contours import get_contours_from_mask
+from muggled_sam.demo_helpers.mask_postprocessing import calculate_mask_stability_score
+from muggled_sam.demo_helpers.history_keeper import HistoryKeeper
+from muggled_sam.demo_helpers.loading import ask_for_path_if_missing, ask_for_model_path_if_missing, load_init_prompts
+from muggled_sam.demo_helpers.misc import get_default_device_string, make_device_config, get_total_cuda_vram_usage_mb
 
 
 # ---------------------------------------------------------------------------------------------------------------------

@@ -8,7 +8,7 @@
 import cv2
 import torch
 
-from lib.demo_helpers.contours import MaskContourData
+from muggled_sam.demo_helpers.contours import MaskContourData
 
 # For type hints
 from numpy import ndarray

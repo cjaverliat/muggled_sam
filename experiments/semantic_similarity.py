@@ -26,25 +26,25 @@ import torch
 import cv2
 import numpy as np
 
-from lib.make_sam import make_sam_from_state_dict
-from lib.v2_sam.sam_v2_model import SAMV2Model
+from muggled_sam.make_sam import make_sam_from_state_dict
+from muggled_sam.v2_sam.sam_v2_model import SAMV2Model
 
-from lib.demo_helpers.ui.window import DisplayWindow, KEY
-from lib.demo_helpers.ui.images import ExpandingImage
-from lib.demo_helpers.ui.layout import HStack, VStack
-from lib.demo_helpers.ui.buttons import ToggleButton
-from lib.demo_helpers.ui.sliders import HSlider, HMultiSlider
-from lib.demo_helpers.ui.static import StaticMessageBar
-from lib.demo_helpers.ui.colormaps import HColormapsBar, make_spectral_colormap
-from lib.demo_helpers.shared_ui_layout import PromptUIControl, PromptUI
-from lib.demo_helpers.ui.helpers.images import get_image_hw_for_max_height
+from muggled_sam.demo_helpers.ui.window import DisplayWindow, KEY
+from muggled_sam.demo_helpers.ui.images import ExpandingImage
+from muggled_sam.demo_helpers.ui.layout import HStack, VStack
+from muggled_sam.demo_helpers.ui.buttons import ToggleButton
+from muggled_sam.demo_helpers.ui.sliders import HSlider, HMultiSlider
+from muggled_sam.demo_helpers.ui.static import StaticMessageBar
+from muggled_sam.demo_helpers.ui.colormaps import HColormapsBar, make_spectral_colormap
+from muggled_sam.demo_helpers.shared_ui_layout import PromptUIControl, PromptUI
+from muggled_sam.demo_helpers.ui.helpers.images import get_image_hw_for_max_height
 
-from lib.demo_helpers.video_frame_select_ui import run_video_frame_select_ui
-from lib.demo_helpers.contours import get_contours_from_mask
+from muggled_sam.demo_helpers.video_frame_select_ui import run_video_frame_select_ui
+from muggled_sam.demo_helpers.contours import get_contours_from_mask
 
-from lib.demo_helpers.history_keeper import HistoryKeeper
-from lib.demo_helpers.loading import ask_for_path_if_missing, ask_for_model_path_if_missing, load_init_prompts
-from lib.demo_helpers.misc import get_default_device_string, make_device_config, normalize_to_npuint8
+from muggled_sam.demo_helpers.history_keeper import HistoryKeeper
+from muggled_sam.demo_helpers.loading import ask_for_path_if_missing, ask_for_model_path_if_missing, load_init_prompts
+from muggled_sam.demo_helpers.misc import get_default_device_string, make_device_config, normalize_to_npuint8
 
 
 # ---------------------------------------------------------------------------------------------------------------------
