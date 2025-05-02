@@ -146,8 +146,8 @@ class SAMV2ImageEncoder(nn.Module):
         max_side_length: int = 1024,
         use_square_sizing: bool = True,
         pad_to_square: bool = False,
-        color_format: Literal["rgb", "bgr"] = "rgb",
-        channels_layout: Literal["chw", "hwc"] = "chw",
+        src_color_format: Literal["rgb", "bgr"] = "rgb",
+        src_channels_layout: Literal["chw", "hwc"] = "chw",
     ) -> Tensor:
         """
         Helper used to convert images tensor into the format needed by the image encoder model (includes scaling
@@ -157,9 +157,9 @@ class SAMV2ImageEncoder(nn.Module):
         """
         if image_tensor.ndim not in (3, 4):
             raise ValueError(f"Expected image tensor to have 3 or 4 dimensions, got {image_tensor.ndim}")
-        if channels_layout == "chw" and image_tensor.shape[-3] != 3:
+        if src_channels_layout == "chw" and image_tensor.shape[-3] != 3:
             raise ValueError(f"Expected image tensor to have shape (B, 3, H, W) or (3, H, W), got {image_tensor.shape}")
-        if channels_layout == "hwc" and image_tensor.shape[-1] != 3:
+        if src_channels_layout == "hwc" and image_tensor.shape[-1] != 3:
             raise ValueError(f"Expected image tensor to have shape (B, H, W, 3) or (H, W, 3), got {image_tensor.shape}")
 
         device, dtype = self.mean_rgb.device, self.mean_rgb.dtype
@@ -169,10 +169,10 @@ class SAMV2ImageEncoder(nn.Module):
         if image_tensor.ndim == 3:
             image_tensor = image_tensor.unsqueeze(0)
         # Re-order channels to BCHW format if needed
-        if channels_layout == "hwc":
+        if src_channels_layout == "hwc":
             image_tensor = image_tensor.permute(0, 3, 1, 2)
         # Convert to RGB if needed
-        if color_format == "bgr":
+        if src_color_format == "bgr":
             image_tensor = image_tensor.flip(-1)
 
         img_h, img_w = image_tensor.shape[2:]
@@ -219,7 +219,7 @@ class SAMV2ImageEncoder(nn.Module):
         use_square_sizing=True,
         pad_to_square=False,
         src_color_format: Literal["rgb", "bgr"] = "bgr",
-        channels_layout: Literal["chw", "hwc"] = "hwc",
+        src_channels_layout: Literal["chw", "hwc"] = "hwc",
     ) -> Tensor:
         """
         Helper used to convert opencv-formatted images (e.g. from loading: cv2.imread(path_to_image))
@@ -243,8 +243,8 @@ class SAMV2ImageEncoder(nn.Module):
             max_side_length=max_side_length,
             use_square_sizing=use_square_sizing,
             pad_to_square=pad_to_square,
-            color_format=src_color_format,
-            channels_layout=channels_layout,
+            src_color_format=src_color_format,
+            src_channels_layout=src_channels_layout,
         )
     # .................................................................................................................
 
