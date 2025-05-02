@@ -16,7 +16,7 @@ except ModuleNotFoundError:
 
 import cv2
 import torch
-from lib.make_sam import make_sam_from_state_dict
+from muggled_sam.make_sam import make_sam_from_state_dict
 
 
 # Setup

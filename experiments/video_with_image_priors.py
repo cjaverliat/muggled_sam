@@ -25,24 +25,24 @@ from time import perf_counter
 import torch
 import cv2
 
-from lib.make_sam import make_sam_from_state_dict
-from lib.v2_sam.sam_v2_model import SAMV2Model
+from muggled_sam.make_sam import make_sam_from_state_dict
+from muggled_sam.v2_sam.sam_v2_model import SAMV2Model
 
-from lib.demo_helpers.ui.video import LoopingVideoReader, LoopingVideoPlaybackSlider, ValueChangeTracker
-from lib.demo_helpers.ui.window import DisplayWindow
-from lib.demo_helpers.ui.layout import HStack, VStack
-from lib.demo_helpers.ui.buttons import ToggleButton, ImmediateButton
-from lib.demo_helpers.ui.text import TitledTextBlock, ValueBlock
-from lib.demo_helpers.ui.static import StaticMessageBar
-from lib.demo_helpers.shared_ui_layout import PromptUIControl, PromptUI, ReusableBaseImage
+from muggled_sam.demo_helpers.ui.video import LoopingVideoReader, LoopingVideoPlaybackSlider, ValueChangeTracker
+from muggled_sam.demo_helpers.ui.window import DisplayWindow
+from muggled_sam.demo_helpers.ui.layout import HStack, VStack
+from muggled_sam.demo_helpers.ui.buttons import ToggleButton, ImmediateButton
+from muggled_sam.demo_helpers.ui.text import TitledTextBlock, ValueBlock
+from muggled_sam.demo_helpers.ui.static import StaticMessageBar
+from muggled_sam.demo_helpers.shared_ui_layout import PromptUIControl, PromptUI, ReusableBaseImage
 
-from lib.demo_helpers.video_frame_select_ui import run_video_frame_select_ui
-from lib.demo_helpers.contours import get_contours_from_mask
-from lib.demo_helpers.video_data_storage import SAM2VideoObjectResults
+from muggled_sam.demo_helpers.video_frame_select_ui import run_video_frame_select_ui
+from muggled_sam.demo_helpers.contours import get_contours_from_mask
+from muggled_sam.demo_helpers.video_data_storage import SAM2VideoObjectResults
 
-from lib.demo_helpers.history_keeper import HistoryKeeper
-from lib.demo_helpers.loading import ask_for_path_if_missing, ask_for_model_path_if_missing
-from lib.demo_helpers.misc import PeriodicVRAMReport, get_default_device_string, make_device_config
+from muggled_sam.demo_helpers.history_keeper import HistoryKeeper
+from muggled_sam.demo_helpers.loading import ask_for_path_if_missing, ask_for_model_path_if_missing
+from muggled_sam.demo_helpers.misc import PeriodicVRAMReport, get_default_device_string, make_device_config
 
 
 # ---------------------------------------------------------------------------------------------------------------------

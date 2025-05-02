@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "muggled_sam"
+version = "0.1.0"
+description = "Muggled SAM: A modified version of Segment Anything Model"
+requires-python = ">=3.10"
+authors = [
+    { name = "Charles JAVERLIAT", email = "charles.javerliat@gmail.com" },
+]
+dependencies = [
+    "torch>=2.1.0",
+    "numpy>=1.21.0",
+    "opencv-python>=4.5.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["muggled_sam"]

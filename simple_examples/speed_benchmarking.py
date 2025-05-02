@@ -17,7 +17,7 @@ import os
 import torch
 import numpy as np
 from time import perf_counter
-from lib.make_sam import make_sam_from_state_dict
+from muggled_sam.make_sam import make_sam_from_state_dict
 
 # Define pathing
 model_path = "/path/to/sam_v1_or_v2_model.pth"

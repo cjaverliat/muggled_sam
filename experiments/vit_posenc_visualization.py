@@ -24,21 +24,21 @@ import os.path as osp
 import torch
 import cv2
 
-from lib.make_sam import make_sam_from_state_dict
-from lib.v1_sam.sam_v1_model import SAMV1Model
-from lib.v2_sam.sam_v2_model import SAMV2Model
+from muggled_sam.make_sam import make_sam_from_state_dict
+from muggled_sam.v1_sam.sam_v1_model import SAMV1Model
+from muggled_sam.v2_sam.sam_v2_model import SAMV2Model
 
-from lib.demo_helpers.ui.window import DisplayWindow, KEY
-from lib.demo_helpers.ui.base import force_same_min_width
-from lib.demo_helpers.ui.layout import HStack, VStack
-from lib.demo_helpers.ui.buttons import ToggleButton
-from lib.demo_helpers.ui.sliders import HSlider
-from lib.demo_helpers.ui.static import StaticMessageBar, HSeparator
-from lib.demo_helpers.ui.images import ExpandingImage
+from muggled_sam.demo_helpers.ui.window import DisplayWindow, KEY
+from muggled_sam.demo_helpers.ui.base import force_same_min_width
+from muggled_sam.demo_helpers.ui.layout import HStack, VStack
+from muggled_sam.demo_helpers.ui.buttons import ToggleButton
+from muggled_sam.demo_helpers.ui.sliders import HSlider
+from muggled_sam.demo_helpers.ui.static import StaticMessageBar, HSeparator
+from muggled_sam.demo_helpers.ui.images import ExpandingImage
 
-from lib.demo_helpers.history_keeper import HistoryKeeper
-from lib.demo_helpers.loading import ask_for_model_path_if_missing
-from lib.demo_helpers.misc import get_default_device_string, make_device_config, normalize_to_npuint8
+from muggled_sam.demo_helpers.history_keeper import HistoryKeeper
+from muggled_sam.demo_helpers.loading import ask_for_model_path_if_missing
+from muggled_sam.demo_helpers.misc import get_default_device_string, make_device_config, normalize_to_npuint8
 
 
 # ---------------------------------------------------------------------------------------------------------------------
