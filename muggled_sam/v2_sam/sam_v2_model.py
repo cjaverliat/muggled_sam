@@ -132,14 +132,62 @@ class SAMV2Model(nn.Module):
 
     # .................................................................................................................
 
-    def encode_image(
+    def encode_image_tensor(
         self,
-        image_bgr: ndarray,
+        image_tensor: Tensor,
         max_side_length=1024,
         use_square_sizing=True,
+        pad_to_square=False,
+        src_color_format="rgb",
+        src_channels_layout="chw",
     ) -> tuple[list[Tensor], tuple[int, int], tuple[int, int]]:
         """
-        Function used to compute image encodings from a bgr formatted image (e.g. loaded from opencv)
+        Function used to compute image encodings from a image tensor.
+        The max_side_length setting is used to set the size at which the image is processed,
+        while the use_square_sizing determines whether the image is scaled to a square resolution
+        or scaled (to the max_side_length) based on it's original aspect ratio.
+
+        Returns:
+            encoded_images_list, patch_grid_hw, preencoded_image_hw
+            -> Encoded images list contains 3 multi-resolution feature maps
+               they have shapes: Bx256x64x64, Bx64x128x128, Bx32x256x256
+               (using default settings). The first-most feature map is
+               the 'low-res' map needed by several other parts of the model
+            -> The patch_grid_hw contains the height & width of the low-res
+               feature map (64x64 with default 1024x1024 input sizing)
+            -> The preencoded_image_hw contains the height & width of the
+               input image after pre-processing, just before being encoded
+               by default it would be 1024x1024
+        """
+        with torch.inference_mode():
+            image_rgb_normalized_bchw = self.image_encoder.prepare_image_tensor(
+                image_tensor,
+                max_side_length=max_side_length,
+                use_square_sizing=use_square_sizing,
+                pad_to_square=pad_to_square,
+                src_color_format=src_color_format,
+                src_channels_layout=src_channels_layout,
+            )
+            image_preenc_hw = image_rgb_normalized_bchw.shape[2:]
+            encoded_image_features_list = self.image_encoder(image_rgb_normalized_bchw)
+
+        # Get patch sizing of lowest-res tokens (as needed by other components)
+        patch_grid_hw = encoded_image_features_list[0].shape[2:]
+
+        return encoded_image_features_list, patch_grid_hw, image_preenc_hw
+
+
+    def encode_image(
+        self,
+        image: ndarray,
+        max_side_length=1024,
+        use_square_sizing=True,
+        pad_to_square=False,
+        src_color_format="bgr",
+        src_channels_layout="hwc",
+    ) -> tuple[list[Tensor], tuple[int, int], tuple[int, int]]:
+        """
+        Function used to compute image encodings from a numpy image (e.g. loaded from opencv)
         The max_side_length setting is used to set the size at which the image is processed,
         while the use_square_sizing determines whether the image is scaled to a square resolution
         or scaled (to the max_side_length) based on it's original aspect ratio.
@@ -158,7 +206,14 @@ class SAMV2Model(nn.Module):
         """
 
         with torch.inference_mode():
-            image_rgb_normalized_bchw = self.image_encoder.prepare_image(image_bgr, max_side_length, use_square_sizing)
+            image_rgb_normalized_bchw = self.image_encoder.prepare_image(
+                image,
+                max_side_length=max_side_length,
+                use_square_sizing=use_square_sizing,
+                pad_to_square=pad_to_square,
+                src_color_format=src_color_format,
+                src_channels_layout=src_channels_layout,
+            )
             image_preenc_hw = image_rgb_normalized_bchw.shape[2:]
             encoded_image_features_list = self.image_encoder(image_rgb_normalized_bchw)
 
